@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Banner</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#c{position:relative;width:100%;height:100%}
+.s{position:absolute;inset:0;opacity:0;transition:opacity .6s}
+.s.on{opacity:1}
+.s img{width:100%;height:100%;object-fit:cover;display:block}
+#d{position:absolute;bottom:8px;left:0;right:0;text-align:center}
+#d i{display:inline-block;width:8px;height:8px;margin:0 3px;border-radius:50%;background:rgba(255,255,255,.4)}
+#d i.on{background:#fff}
+</style>
+</head>
+<body>
+<div id="c"></div><div id="d"></div>
+<script>
+const INTERVAL=4000;
+fetch('images.json?'+Date.now()).then(r=>r.json()).then(list=>{
+  const c=document.getElementById('c'),d=document.getElementById('d');
+  if(!list.length)return;
+  list.forEach((f,i)=>{
+    const s=document.createElement('div');s.className='s'+(i?'':' on');
+    s.innerHTML='<img src="images/'+encodeURIComponent(f)+'" alt="">';c.appendChild(s);
+    const p=document.createElement('i');if(!i)p.className='on';d.appendChild(p);
+  });
+  if(list.length<2){d.style.display='none';return}
+  const S=c.children,P=d.children;let n=0;
+  const go=k=>{S[n].classList.remove('on');P[n].classList.remove('on');n=(k+list.length)%list.length;S[n].classList.add('on');P[n].classList.add('on')};
+  let t=setInterval(()=>go(n+1),INTERVAL);
+  let x0=null;
+  c.addEventListener('touchstart',e=>x0=e.touches[0].clientX);
+  c.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40){go(n+(dx<0?1:-1));clearInterval(t);t=setInterval(()=>go(n+1),INTERVAL)}x0=null});
+});
+</script>
+</body>
+</html>
